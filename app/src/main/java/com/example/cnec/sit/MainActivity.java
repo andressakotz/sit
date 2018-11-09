@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String[] ruas = new String[]{"Rua do Rosário ",
             "Rua São Lourenço ",
-            "Travessa Butia ",
+            "Travessa Francisco M Galeazi ",
             "Travessa Germano Mousquer ",
             "Rua Oscar Ernesto Jung ",
             "Travessa Fabiano Rosa de Paula ",
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String[] ruas2 = new String[]{"Rua do Rosário ",
             "Rua São Lourenço ",
-            "Travessa Butia ",
+            "Travessa Francisco M Galeazi ",
             "Travessa Germano Mousquer ",
             "Rua Oscar Ernesto Jung ",
             "Travessa Fabiano Rosa de Paula ",
