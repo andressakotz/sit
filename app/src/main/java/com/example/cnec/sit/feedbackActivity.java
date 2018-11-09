@@ -95,6 +95,7 @@ public class feedbackActivity extends AppCompatActivity {
 
         if(campoFeedback.length() > 0){
             Toast.makeText(feedbackActivity.this, "Seu feedback sobre: " + nomeSP3 + ", " + nomeSP4 + " foi enviado com sucesso!", Toast.LENGTH_SHORT).show();
+            //AQUI É ONDE DEVE OS DADOS DE FEEDBACK DEVEM SER INSERIDOS
         }
         else{
             Toast.makeText(feedbackActivity.this, "Preencha o campo de feedback", Toast.LENGTH_SHORT).show();
