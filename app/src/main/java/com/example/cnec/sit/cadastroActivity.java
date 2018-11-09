@@ -64,12 +64,12 @@ public class cadastroActivity extends AppCompatActivity {
         boolean checked = ((CheckBox) view).isChecked();
 
         switch(view.getId()) {
-            case R.id.visitante:
+            case R.id.radioVisitante:
                 if (checked)
                     Toast.makeText(cadastroActivity.this, "Visitante", Toast.LENGTH_SHORT).show();
                 else
                     break;
-            case R.id.municipe:
+            case R.id.radioMunicipe:
                 if (checked)
                     Toast.makeText(cadastroActivity.this, "Munícipe", Toast.LENGTH_SHORT).show();
                 else

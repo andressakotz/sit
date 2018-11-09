@@ -84,7 +84,7 @@
         android:ems="10"
         android:inputType="textPersonName"
         android:singleLine="false"
-        android:textColor="#FFF"
+        android:textColor="@android:color/white"
         android:textColorHighlight="#FFF"
         android:textColorHint="#FFF"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -126,11 +126,13 @@
         android:backgroundTint="#FFF"
         android:ems="10"
         android:inputType="date"
+        android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.503"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/imageView10"
-        app:layout_constraintVertical_bias="0.431" />
+        app:layout_constraintVertical_bias="0.437" />
 
     <TextView
         android:id="@+id/email"
@@ -163,6 +165,7 @@
         android:backgroundTint="#FFF"
         android:ems="10"
         android:inputType="textEmailAddress"
+        android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -202,12 +205,13 @@
         android:backgroundTint="#FFF"
         android:ems="10"
         android:inputType="textPassword"
+        android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.708" />
+        app:layout_constraintVertical_bias="0.726" />
 
     <Button
         android:id="@+id/enviacadlogin"
@@ -247,34 +251,35 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.946" />
 
-    <CheckBox
-        android:id="@+id/municipe"
-        android:layout_width="133dp"
-        android:layout_height="47dp"
-        android:onClick="onCheckboxClicked"
-        android:text="Munícipe "
-        android:textColor="@android:color/background_light"
-        android:textSize="24sp"
+    <RadioGroup
+        android:layout_width="273dp"
+        android:layout_height="64dp"
+        android:layout_marginBottom="64dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.827"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.784" />
+        app:layout_constraintHorizontal_bias="0.505"
+        app:layout_constraintStart_toStartOf="parent">
 
-    <CheckBox
-        android:id="@+id/visitante"
-        android:layout_width="129dp"
-        android:layout_height="43dp"
-        android:onClick="onCheckboxClicked"
-        android:text="Visitante"
-        android:textColor="@android:color/background_light"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.134"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.778" />
+        <RadioButton
+            android:id="@+id/radioMunicipe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Munícipe"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
+
+        <RadioButton
+            android:id="@+id/radioVisitante"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Visitante"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
+    </RadioGroup>
 
 </android.support.constraint.ConstraintLayout>
