@@ -1,6 +1,9 @@
 package com.example.cnec.sit;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -12,6 +15,20 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class feedbackActivity extends AppCompatActivity {
 
@@ -75,32 +92,18 @@ public class feedbackActivity extends AppCompatActivity {
 
     }
 
-    /*public void enviarFeedback (View v) {
-
-        Toast.makeText(feedbackActivity.this, "Feedback enviado com sucesso!", Toast.LENGTH_SHORT).show();
-
-    }*/
-
 
     public void enviarFeedback (View v) {
         EditText campoFeedback = (EditText) findViewById(R.id.campoFeedback);
 
-        String nomeSP3 = (String) sp3.getSelectedItem();
-        long idSP3 = sp3.getSelectedItemId();
-        int posicaoSP3 = sp3.getSelectedItemPosition();
 
-        String nomeSP4 = (String) sp4.getSelectedItem();
-        long idSP4 = sp4.getSelectedItemId();
-        int posicaoSP4 = sp4.getSelectedItemPosition();
+        String [] envia = new String[4];
+        envia[0] = (String) sp3.getSelectedItem();
+        envia[1] = (String) sp4.getSelectedItem();
+        envia[2] = campoFeedback.getText().toString();
+        envia[3] = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(new Date());
 
-        if(campoFeedback.length() > 0){
-            Toast.makeText(feedbackActivity.this, "Seu feedback sobre: " + nomeSP3 + ", " + nomeSP4 + " foi enviado com sucesso!", Toast.LENGTH_SHORT).show();
-            //AQUI É ONDE DEVE OS DADOS DE FEEDBACK DEVEM SER INSERIDOS
-        }
-        else{
-            Toast.makeText(feedbackActivity.this, "Preencha o campo de feedback", Toast.LENGTH_SHORT).show();
-        }
-
+        new feedbackActivity.AsyncSend().execute(envia);
 
     }
 
@@ -138,5 +141,125 @@ public class feedbackActivity extends AppCompatActivity {
     public void vaiParaInicio(View v) {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+    }
+
+    private class AsyncSend extends AsyncTask<String, String, String> {
+
+        ProgressDialog pdLoading = new ProgressDialog(feedbackActivity.this);
+        HttpURLConnection conn;
+        URL url = null;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            //this method will be running on UI thread
+            pdLoading.setMessage("\tProcessando...");
+            pdLoading.setCancelable(false);
+            pdLoading.show();
+
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+
+                // Enter URL address where your php file resides
+                url = new URL(Connection.FEEDBACK_URL);
+
+            } catch (MalformedURLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                return "exception";
+            }
+            try {
+                // Setup HttpURLConnection class to send and receive data from php and mysql
+                conn = (HttpURLConnection)url.openConnection();
+                conn.setReadTimeout(Connection.READ_TIMEOUT);
+                conn.setConnectTimeout(Connection.CONNECTION_TIMEOUT);
+                conn.setRequestMethod(Connection.METHOD);
+
+                // setDoInput and setDoOutput method depict handling of both send and receive
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                // Append parameters to URL
+                Uri.Builder builder = new Uri.Builder()
+                        .appendQueryParameter(Connection.QUERY_ASSUNTO_PARAMETER, params[0]);
+
+                builder.appendQueryParameter(Connection.QUERY_CATEGORIA_PARAMETER, params[1]);
+                builder.appendQueryParameter(Connection.QUERY_DESCRICAO_PARAMETER, params[2]);
+                builder.appendQueryParameter(Connection.QUERY_DATA_PARAMETER, params[3]);
+
+                String query = builder.build().getEncodedQuery();
+
+                // Open connection for sending data
+
+                OutputStream os = conn.getOutputStream();
+
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+
+                writer.write(query);
+                writer.flush();
+                writer.close();
+                os.close();
+                conn.connect();
+
+
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+
+                return "exception";
+            }
+
+            try {
+
+                int response_code = conn.getResponseCode();
+
+                // Check if successful connection made
+                if (response_code == HttpURLConnection.HTTP_OK) {
+
+                    // Read data sent from server
+                    InputStream input = conn.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    StringBuilder result = new StringBuilder();
+                    String line;
+
+                    while ((line = reader.readLine()) != null) {
+                        result.append(line);
+                    }
+
+                    // Pass data to onPostExecute method
+                    return(result.toString());
+
+                }else{
+                    return("unsuccessful");
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return "exception";
+            } finally {
+                conn.disconnect();
+            }
+
+
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            pdLoading.dismiss();
+
+            if(result.equalsIgnoreCase("true")){
+                Toast.makeText(feedbackActivity.this, "Feedback enviado ¯\\_(ツ)_/¯", Toast.LENGTH_LONG).show();
+
+            }
+            else if (result.equalsIgnoreCase("exception") || result.equalsIgnoreCase("unsuccessful")) {
+                Toast.makeText(feedbackActivity.this, "OOPs! Algo não está certo", Toast.LENGTH_LONG).show();
+            }
+        }
+
     }
 }

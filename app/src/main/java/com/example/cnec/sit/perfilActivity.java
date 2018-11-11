@@ -1,6 +1,10 @@
 package com.example.cnec.sit;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -17,24 +21,32 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public class perfilActivity extends AppCompatActivity {
+
+    Intent intent;
+    Intent intentExcluido;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_perfil);
 
-        TextView nome = findViewById(R.id.nome);
-        nome.setText("José Eduardo Leischtweis");
+        intent = new Intent(this, loginActivity.class);
+        intentExcluido = new Intent(this, MainActivity.class);
+        String login = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        TextView nasc = findViewById(R.id.nasc);
-        nasc.setText("31/05/1985");
-
-        TextView email = findViewById(R.id.email);
-        email.setText("josedl33@hotmail.com");
-
-        TextView senha = findViewById(R.id.senha);
-        senha.setText("joseedle1958");
+        new perfilActivity.AsyncSend().execute(login);
     }
 
     public void alterar (View v) {
@@ -44,93 +56,261 @@ public class perfilActivity extends AppCompatActivity {
 
     public void excluir (View v) {
 
-        Toast.makeText(perfilActivity.this, "Excluido com sucesso!", Toast.LENGTH_SHORT).show();
+        String [] delete = new String[2];
+        TextView tv7 = findViewById(R.id.email);
+
+        TextView tv8 = findViewById(R.id.senha);
+
+        delete[0] = tv7.getText().toString();
+        delete[1] = tv8.getText().toString();
+        new perfilActivity.AsyncSendDelete().execute(delete);
     }
 
-    /*public void excluirConta(View v) {
-        TextView nome = findViewById(R.id.nome);
+    private class AsyncSend extends AsyncTask<String, String, String> {
 
-        excluirContaActivity excluirConta = new excluirContaActivity();
+        ProgressDialog pdLoading = new ProgressDialog(perfilActivity.this);
+        HttpURLConnection conn;
+        URL url = null;
 
-        excluirConta.execute(nome.getText().toString());
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
 
-    }
+            //this method will be running on UI thread
+            pdLoading.setMessage("\tProcessando...");
+            pdLoading.setCancelable(false);
+            pdLoading.show();
 
-    public void editarConta(View v) {
-        TextView nome = findViewById(R.id.nome);
-        TextView data_nasc = findViewById(R.id.nasc);
-        TextView email = findViewById(R.id.email);
-        TextView senha = findViewById(R.id.senha);
-
-        edicarContaActivity editarConta = new edicarContaActivity();
-
-        editarConta.execute(nome.getText().toString(),
-                data_nasc.getText().toString(),
-                email.getText().toString(),
-                senha.getText().toString());
-
-    }
-
-    /*public void exibirListagem(String o) {
-        try {
-            JSONArray jsonArray = new JSONArray(o);
-
-            TextView nome = new TextView(this);
-            //nome.setText("Nome");
-            nome.setTextSize(30);
-
-            TextView data_nasc = new TextView(this);
-            //data_nasc.setText("data_nasc");
-            data_nasc.setTextSize(30);
-
-            TextView email = new TextView(this);
-            //email.setText("email");
-            email.setTextSize(30);
-
-            TextView senha = new TextView(this);
-            //senha.setText("senha");
-            senha.setTextSize(30);
-
-            TableRow tr = new TableRow(this);
-
-            tr.addView(nome);
-            tr.addView(data_nasc);
-            tr.addView(email);
-            tr.addView(senha);
-
-
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject JSONConta = jsonArray.getJSONObject(i);
-
-                nome = new TextView(this);
-                nome.setText(JSONConta.get("nome").toString());
-                nome.setTextSize(30);
-
-                data_nasc = new TextView(this);
-                data_nasc.setText(JSONConta.get("data_nasc").toString());
-                data_nasc.setTextSize(30);
-
-                email = new TextView(this);
-                email.setText(JSONConta.get("email").toString());
-                email.setTextSize(30);
-
-                senha = new TextView(this);
-                senha.setText(JSONConta.get("senha").toString());
-                senha.setTextSize(30);
-
-                tr = new TableRow(this);
-
-                tr.addView(nome);
-                tr.addView(data_nasc);
-                tr.addView(email);
-                tr.addView(senha);
-//                Log.d("Nome:", JSONLivro.get("nome").toString());
-//                Log.d("Ano:", JSONLivro.get("ano").toString());
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
-    }*/
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+
+                // Enter URL address where your php file resides
+                url = new URL(Connection.GETLOGIN_URL);
+
+            } catch (MalformedURLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                return "exception";
+            }
+            try {
+                // Setup HttpURLConnection class to send and receive data from php and mysql
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(Connection.READ_TIMEOUT);
+                conn.setConnectTimeout(Connection.CONNECTION_TIMEOUT);
+                conn.setRequestMethod(Connection.METHOD);
+
+                // setDoInput and setDoOutput method depict handling of both send and receive
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                // Append parameters to URL
+                Uri.Builder builder = new Uri.Builder()
+                        .appendQueryParameter(Connection.QUERY_ANDROIDID_PARAMETER, params[0]);
+
+                String query = builder.build().getEncodedQuery();
+
+                // Open connection for sending data
+
+                OutputStream os = conn.getOutputStream();
+
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+
+                writer.write(query);
+                writer.flush();
+                writer.close();
+                os.close();
+                conn.connect();
+
+
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+
+                return "exception";
+            }
+
+            try {
+
+                int response_code = conn.getResponseCode();
+
+                // Check if successful connection made
+                if (response_code == HttpURLConnection.HTTP_OK) {
+
+                    // Read data sent from server
+                    InputStream input = conn.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    StringBuilder result = new StringBuilder();
+                    String line;
+
+                    while ((line = reader.readLine()) != null) {
+                        result.append(line);
+                    }
+
+                    // Pass data to onPostExecute method
+                    return(result.toString());
+
+                }else{
+                    return("unsuccessful");
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return "exception";
+            } finally {
+                conn.disconnect();
+            }
+
+
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            pdLoading.dismiss();
+            if (result.equalsIgnoreCase("exception") || result.equalsIgnoreCase("unsuccessful")) {
+                Toast.makeText(perfilActivity.this, "OOPs! Você não está logado :(", Toast.LENGTH_LONG).show();
+                startActivity(intent);
+            }else{
+                String r = result.replace("]", "");
+                r = r.replace("\"", "");
+                String[] resultSplit = r.split(",");
+
+                TextView tv = findViewById(R.id.nome);
+                tv.setText(resultSplit[1]);
+
+                TextView tv1 = findViewById(R.id.nasc);
+                tv1.setText(resultSplit[6]);
+
+                TextView tv8 = findViewById(R.id.email);
+                tv8.setText(resultSplit[2]);
+
+                TextView tv7 = findViewById(R.id.senha);
+                tv7.setText(resultSplit[3]);
+            }
+        }
+
+    }
+
+    private class AsyncSendDelete extends AsyncTask<String, String, String> {
+
+        ProgressDialog pdLoading = new ProgressDialog(perfilActivity.this);
+        HttpURLConnection conn;
+        URL url = null;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            //this method will be running on UI thread
+            pdLoading.setMessage("\tProcessando...");
+            pdLoading.setCancelable(false);
+            pdLoading.show();
+
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+
+                // Enter URL address where your php file resides
+                url = new URL(Connection.DELETE_URL);
+
+            } catch (MalformedURLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                return "exception";
+            }
+            try {
+                // Setup HttpURLConnection class to send and receive data from php and mysql
+                conn = (HttpURLConnection)url.openConnection();
+                conn.setReadTimeout(Connection.READ_TIMEOUT);
+                conn.setConnectTimeout(Connection.CONNECTION_TIMEOUT);
+                conn.setRequestMethod(Connection.METHOD);
+
+                // setDoInput and setDoOutput method depict handling of both send and receive
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                // Append parameters to URL
+                Uri.Builder builder = new Uri.Builder()
+                        .appendQueryParameter(Connection.QUERY_EMAIL_PARAMETER, params[0]);
+
+                builder.appendQueryParameter(Connection.QUERY_PASSWORD_PARAMETER, params[1]);
+
+                String query = builder.build().getEncodedQuery();
+
+                // Open connection for sending data
+
+                OutputStream os = conn.getOutputStream();
+
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+
+                writer.write(query);
+                writer.flush();
+                writer.close();
+                os.close();
+                conn.connect();
+
+
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+
+                return "exception";
+            }
+
+            try {
+
+                int response_code = conn.getResponseCode();
+
+                // Check if successful connection made
+                if (response_code == HttpURLConnection.HTTP_OK) {
+
+                    // Read data sent from server
+                    InputStream input = conn.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    StringBuilder result = new StringBuilder();
+                    String line;
+
+                    while ((line = reader.readLine()) != null) {
+                        result.append(line);
+                    }
+
+                    // Pass data to onPostExecute method
+                    return(result.toString());
+
+                }else{
+                    return("unsuccessful");
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return "exception";
+            } finally {
+                conn.disconnect();
+            }
+
+
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            pdLoading.dismiss();
+            if(result.equalsIgnoreCase("true")){
+                Toast.makeText(perfilActivity.this, "Seu cadastro foi excluido :(", Toast.LENGTH_LONG).show();
+                startActivity(intentExcluido);
+
+            }
+            else if (result.equalsIgnoreCase("exception") || result.equalsIgnoreCase("unsuccessful")) {
+                Toast.makeText(perfilActivity.this, "OOPs! Algo não está certo", Toast.LENGTH_LONG).show();
+            }
+        }
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
