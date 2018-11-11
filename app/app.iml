@@ -139,5 +139,6 @@
     <orderEntry type="library" name="com.google.android.gms:play-services-base-16.0.1" level="project" />
     <orderEntry type="library" name="com.android.support:design-26.1.0" level="project" />
     <orderEntry type="library" name="com.android.support:transition-26.1.0" level="project" />
+    <orderEntry type="library" name="com.github.rtoshiro.mflibrary:mflibrary-1.0.0" level="project" />
   </component>
 </module>
