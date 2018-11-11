@@ -13,32 +13,30 @@ $db = $database->getConnection();
 
 if($db){
 
-	  $pessoa = new pessoa($db);
+  $pessoa = new pessoa($db); //a classe pessoa vai receber email, password e android id p tentar fazer login
 
-	    $pessoa->email = $_POST['email'];
-	    $pessoa->password = $_POST['password'];
-	     $pessoa->androidID = $_POST['androidID'];
-		
-	      if($pessoa->login()){
-		     if($pessoa->createlogin()){
-		       http_response_code(200);
-		       echo "existe";
-		     }else{
-			http_response_code(400);
-			echo '"Não encontrado"';
-		     }
+  $pessoa->email = $_POST['email'];
+  $pessoa->password = $_POST['password'];
+  $pessoa->androidID = $_POST['androidID'];
 
-			    }
-	      else{
-		            http_response_code(400);
-			          echo '"Não encontrado"';
-
-			      }
+//entra nesse if caso exista o cadastro
+  if($pessoa->login()){
+    if($pessoa->createlogin()){ //cria o login na tabela de login no bd
+      http_response_code(200); //variavel de retorno php, onde 200 é ok
+      echo "existe";
+    }else{
+      http_response_code(400); // //variavel retorno php, onde 400 é bad response
+      echo '"Não encontrado"';
+    }
+  }
+  else{
+      http_response_code(400);
+      echo '"Não encontrado"';
+  }
 }else{
-	     http_response_code(400);
-	       echo '{';
-	           echo '"message": "Não foi possível acessar o banco."';
-	       echo '}';
+     http_response_code(400); //caso n consiga acessar o banco
+  echo '{';
+      echo '"message": "Não foi possível acessar o banco."';
+  echo '}';
 }
 ?>
-

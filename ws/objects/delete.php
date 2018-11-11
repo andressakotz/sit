@@ -9,29 +9,28 @@ include_once '../config/database.php';
 include_once '../objects/pessoa.php';
 
 $database = new Database();
-$db = $database->getConnection();
+$db = $database->getConnection(); //faz a conexão do bd
 
 if($db){
 
-	  $pessoa = new pessoa($db);
-
-	    $pessoa->email = $_POST['email'];
-	    $pessoa->password = $_POST['password'];
-
-	      if($pessoa->login()){
-		          $pessoa->delete();
-			      http_response_code(200);
-			      echo "true";
-			        }
-	      else{
-		            http_response_code(400);
-			          echo '"Não encontrado"';
-			      }
+  $pessoa = new pessoa($db);
+//pega os dados do usuario
+  $pessoa->email = $_POST['email'];
+  $pessoa->password = $_POST['password'];
+//ve se está logado, se sim, deleta
+  if($pessoa->login()){
+    $pessoa->delete();
+    http_response_code(200);
+    echo "true";
+  }
+  else{ //se n foi encontrado, ele n deleta
+      http_response_code(400);
+      echo '"Não encontrado"';
+  }
 }else{
-	     http_response_code(400);
-	       echo '{';
-	           echo '"message": "Não foi possível acessar o banco."';
-	       echo '}';
+     http_response_code(400);
+  echo '{';
+      echo '"message": "Não foi possível acessar o banco."';
+  echo '}';
 }
 ?>
-
