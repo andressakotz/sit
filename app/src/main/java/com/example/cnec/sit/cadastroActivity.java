@@ -77,8 +77,8 @@ public class cadastroActivity extends AppCompatActivity {
                 //nome OK
                 nascimento.requestFocus();
                 Toast.makeText(cadastroActivity.this, "Nascimento vazio", Toast.LENGTH_SHORT).show();
-            }else if(ifEmailValido(cadastra[2])){
-                //email OK
+            }else if(!ifEmailValido(cadastra[2])){
+                
                 email.requestFocus();
                 Toast.makeText(cadastroActivity.this, "email inválido", Toast.LENGTH_SHORT).show();
             } else if(ifCampoVazio(cadastra[3])) {
